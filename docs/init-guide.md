@@ -105,7 +105,3 @@ sudo tailscale set --relay-server-port=40000
 
 - `init-system.sh` — 主初始化脚本
 - `docs/` — 详细文档目录
-
-## 许可证
-
-MIT License
