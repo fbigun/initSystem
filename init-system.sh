@@ -67,14 +67,13 @@ gen_readme=${gen_readme:-Y}
 
 # 随机凭据生成逻辑
 if [ -z "$username" ]; then
-    USER_LEN=$((RANDOM % 3 + 6))
-    # 去除 l, o, i 等易混淆字母
-    username=$(cat /dev/urandom | tr -dc 'abcdefghjkmnpqrstuvwxyz' | fold -w $USER_LEN | head -n 1)
+    # 去除 l, o, i 等易混淆字母；|| true 避免 pipefail + head 触发 SIGPIPE
+    username=$(tr -dc 'abcdefghjkmnpqrstuvwxyz' < /dev/urandom | head -c$(( RANDOM % 3 + 6 ))) || true
 fi
 
 if [ -z "$password" ]; then
-    # 去除 0, 1, l, o, i 等易混淆字符
-    password=$(cat /dev/urandom | tr -dc 'abcdefghjkmnpqrstuvwxyz23456789' | fold -w 10 | head -n 1)
+    # 去除 0, 1, l, o, i 等易混淆字符；|| true 避免 pipefail + head 触发 SIGPIPE
+    password=$(tr -dc 'abcdefghjkmnpqrstuvwxyz23456789' < /dev/urandom | head -c 10) || true
 fi
 
 timedatectl set-timezone "$timezone"
@@ -135,7 +134,7 @@ apt-get install -y bpfcc-tools linux-headers-amd64
 # ==================== 3. 智能主机名设置 (国别码-server-MAC后6位) ====================
 echo "正在计算智能主机名..."
 
-DEFAULT_IFACE=$(ip route show default | awk '/default/ {print $5}' | head -n1)
+DEFAULT_IFACE=$(ip route show default | awk '/default/ {print $5}' | head -n1) || true
 if [ -z "$DEFAULT_IFACE" ]; then
     DEFAULT_IFACE="eth0"
 fi
@@ -296,9 +295,9 @@ EOF
 
 CONF_FILE="/etc/apt/apt.conf.d/50unattended-upgrades"
 # 优化 sed 匹配规则，兼容不同空格数量的情况
-sed -i 's|//.*Unattended-Upgrade::Remove-Unused-Kernel-Packages "false";|Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";|' $CONF_FILE
-sed -i 's|//.*Unattended-Upgrade::Remove-Unused-Dependencies "false";|Unattended-Upgrade::Remove-Unused-Dependencies "true";|' $CONF_FILE
-sed -i 's|//.*Unattended-Upgrade::Automatic-Reboot "false";|Unattended-Upgrade::Automatic-Reboot "false";|' $CONF_FILE
+sed -i 's|^\s*//?\s*Unattended-Upgrade::Remove-Unused-Kernel-Packages "false";|Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";|' $CONF_FILE
+sed -i 's|^\s*//?\s*Unattended-Upgrade::Remove-Unused-Dependencies "false";|Unattended-Upgrade::Remove-Unused-Dependencies "true";|' $CONF_FILE
+sed -i 's|^\s*//?\s*Unattended-Upgrade::Automatic-Reboot "false";|Unattended-Upgrade::Automatic-Reboot "false";|' $CONF_FILE
 
 systemctl restart unattended-upgrades.service
 
