@@ -32,3 +32,7 @@ sudo bash init-system.sh -h           # 无人值守帮助
 ## 详细文档
 
 见 [docs/init-guide.md](docs/init-guide.md)
+
+## 许可证
+
+MIT License
