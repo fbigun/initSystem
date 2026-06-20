@@ -21,8 +21,9 @@ bash reinstall.sh debian
 ## 快速使用
 
 ```bash
-sudo bash init-system.sh              # 交互式
-sudo bash init-system.sh -h           # 无人值守帮助
+curl -O https://raw.githubusercontent.com/fbigun/initSystem/main/init-system.sh || wget -O ${_##*/} $_
+bash init-system.sh              # 交互式
+bash init-system.sh -h           # 无人值守帮助
 ```
 
 ## 主要功能
