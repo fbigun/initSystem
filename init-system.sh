@@ -280,6 +280,13 @@ net.ipv4.conf.all.log_martians = 1
 kernel.dmesg_restrict = 1
 EOF
 
+# 3. 开启 BBR 拥塞控制算法与 fq 队列调度
+cat > /etc/sysctl.d/99-bbr.conf << 'EOF'
+# 开启 BBR 拥塞控制与 fq 队列算法，提升网络吞吐量与抗丢包能力
+net.core.default_qdisc = fq
+net.ipv4.tcp_congestion_control = bbr
+EOF
+
 # 统一加载所有 sysctl.d 配置
 sysctl --system 2>/dev/null || true
 
@@ -334,6 +341,7 @@ summary_content=$(cat <<EOF
 系统已更新至 Debian 13 最新状态，时区: $timezone
 防火墙已配置：公网已彻底封死 SSH，仅 Tailscale 网络可登录。
 eBPF 监控工具集已就绪。
+内核参数已加固，并已开启 BBR 拥塞控制算法 (fq 队列)。
 用户 $username 已创建，并已配置 sudo 免密权限。
 Tailscale 已使用官方 Debian Trixie 仓库安装。
 内核转发已开启 (/etc/sysctl.d/99-tailscale.conf)。
